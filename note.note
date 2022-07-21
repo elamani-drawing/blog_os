@@ -1,0 +1,27 @@
+//Cela télécharge une copie de la bibliothèque standard (et core) pour le système. Maintenant nous pouvons compiler notre exécutable autoporté pour cette cible
+rustup target add thumbv7em-none-eabihf
+
+cargo build --target thumbv7em-none-eabihf
+
+//instalation de rust nocturne
+//Le compilateur nocturne nous permet d'opter pour diverses fonctionnalités expérimentales en utilisant ce que l'on appelle des indicateurs de fonctionnalité en haut de notre fichier. Par exemple, nous pourrions activer la asm!macro expérimentale pour l'assemblage en ligne en ajoutant #![feature(asm)]en haut de notre fichier main.rs
+rustup override set nightly
+
+//creation de .cargo/config.toml avec le build core 
+
+//Afin de recompiler ces bibliothèques, cargo a besoin d'accéder au code source de la rouille, que nous pouvons installer avec
+rustup component add rust-src
+
+//build 
+cargo build --target x86_64-blog_os.json
+
+//apres avoir ajouter le bootloader dans cargo.toml 
+//L'ajout du chargeur de démarrage en tant que dépendance n'est pas suffisant pour créer une image disque amorçable. Le problème est que nous devons lier notre noyau au chargeur de démarrage après la compilation
+//donc on utilise
+cargo install bootimage
+rustup component add llvm-tools-preview
+
+//Après avoir installé bootimageet ajouté le llvm-tools-previewcomposant, nous pouvons créer une image disque amorçable en exécutant 
+cargo bootimage
+//Après avoir exécuté la commande, vous devriez voir une image de disque amorçable nommée bootimage-blog_os.bindans votre target/x86_64-blog_os/debugrépertoire. Vous pouvez le démarrer sur une machine virtuelle ou le copier sur une clé USB pour le démarrer sur du matériel réel.
+
