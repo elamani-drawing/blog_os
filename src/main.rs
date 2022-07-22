@@ -16,14 +16,16 @@ pub extern "C" fn _start() -> ! {
     // nomée `_start` par défaut
    
     println!("Hello World{}", "!");
-
+    panic!("Some panic message");
     loop {}
 }
 
 //L’attribut panic_handler définit la fonction que le compilateur doit appeler lorsqu’un panic arrive.
 /// Cette fonction est appelée à chaque panic.
 #[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
+fn panic(info: &PanicInfo) -> ! {
     //Le paramètre PanicInfo contient le fichier et la ligne où le panic a eu lieu et le message optionnel de panic.
+    
+    println!("{}", info);
     loop {}
 }
