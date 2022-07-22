@@ -45,6 +45,8 @@ fn test_runner(tests: &[&dyn Fn()]) {
     for test in tests {
         test();
     }
+    //nous mettons a jou rnotre test runner pour quitter qemu apres l'execution de tous les tests
+    exit_qemu(QemuExitCode::Success);
 }
 
 #[test_case]
@@ -52,4 +54,24 @@ fn trivial_assertion() {
     print!("trivial assertion... ");
     assert_eq!(1, 1);
     println!("[ok]");
+}
+
+//maintenant utiliser le Porttype fourni par le crate pour créer une exit_qemufonctio
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u32)]
+//Pour spécifier le statut de sortie, nous créons une QemuExitCodeénumération. L'idée est de sortir avec le code de sortie succès si tous les tests ont réussi et avec le code de sortie échec sinon
+pub enum QemuExitCode {
+    //0x10 pour le succès et 0x11 pour l'échec
+    Success = 0x10,
+    Failed = 0x11,
+}
+
+//La fonction crée un nouveau Portat 0xf4, qui est le iobasede l' isa-debug-exitappareil. Ensuite, il écrit le code de sortie passé sur le port. Nous l'utilisons u32parce que nous avons spécifié iosizele isa-debug-exitpériphérique sur 4 octets. Les deux opérations ne sont pas sûres, car l'écriture sur un port d'E/S peut généralement entraîner un comportement arbitraire.
+pub fn exit_qemu(exit_code: QemuExitCode) {
+    use x86_64::instructions::port::Port;
+
+    unsafe {
+        let mut port = Port::new(0xf4);
+        port.write(exit_code as u32);
+    }
 }
