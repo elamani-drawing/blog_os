@@ -182,3 +182,32 @@ pub fn _print(args: fmt::Arguments) {
     use core::fmt::Write;
     WRITER.lock().write_fmt(args).unwrap();
 }
+
+//Maintenant que nous avons un cadre de test fonctionnel, nous pouvons créer quelques tests pour notre implémentation de tampon VGA. 
+
+//Un test très simple pour vérifier qu'il printlnfonctionne sans paniquer 
+#[test_case]
+fn test_println_simple() {
+    println!("test_println_simple output");
+}
+
+//Pour s'assurer qu'aucune panique ne se produit même si de nombreuses lignes sont imprimées et que des lignes sont décalées hors de l'écran, nous pouvons créer un autre test :
+#[test_case]
+fn test_println_many() {
+    for _ in 0..200 {
+        println!("test_println_many output");
+    }
+}
+
+//On peut aussi créer une fonction de test pour vérifier que les lignes imprimées apparaissent bien à l'écran 
+#[test_case]
+fn test_println_output() {
+    //a fonction définit une chaîne de test, l'imprime à l'aide printlnde , puis itère sur les caractères d'écran du static WRITER, qui représente le tampon de texte vga. Puisque printlnimprime jusqu'à la dernière ligne d'écran puis ajoute immédiatement une nouvelle ligne, la chaîne doit apparaître sur line BUFFER_HEIGHT - 2.
+    let s = "Some test string that fits on a single line";
+    println!("{}", s);
+    //En utilisant enumerate, nous comptons le nombre d'itérations dans la variable i, que nous utilisons ensuite pour charger le caractère d'écran correspondant à c. En comparant le ascii_charactercaractère de l'écran avec c, nous nous assurons que chaque caractère de la chaîne apparaît réellement dans le tampon de texte vga.
+    for (i, c) in s.chars().enumerate() {
+        let screen_char = WRITER.lock().buffer.chars[BUFFER_HEIGHT - 2][i].read();
+        assert_eq!(char::from(screen_char.ascii_character), c);
+    }
+}
