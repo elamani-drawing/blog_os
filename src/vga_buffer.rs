@@ -1,3 +1,8 @@
+
+//buffer
+use volatile::Volatile;
+
+
 //couleur
 //Normalement, le compilateur émettrait un avertissement pour chaque variante inutilisée. En utilisant l' #[allow(dead_code)]attribut, nous désactivons ces avertissements pour l' Colorénumération.
 #[allow(dead_code)]
@@ -51,10 +56,11 @@ struct ScreenChar {
 const BUFFER_HEIGHT: usize = 25;
 const BUFFER_WIDTH: usize = 80;
 
-#[repr(transparent)]
+//Au lieu d'un ScreenChar, nous utilisons maintenant un Volatile<ScreenChar>. (Le Volatiletype est générique et peut envelopper (presque) n'importe quel type). Cela garantit que nous ne pouvons pas y écrire accidentellement via une écriture "normale".
 struct Buffer {
-    chars: [[ScreenChar; BUFFER_WIDTH]; BUFFER_HEIGHT],
+    chars: [[Volatile<ScreenChar>; BUFFER_WIDTH]; BUFFER_HEIGHT],
 }
+
 
 //Pour écrire réellement à l'écran, nous créons maintenant un type d'écrivai
 //Le rédacteur écrira toujours jusqu'à la dernière ligne et décalera les lignes vers le haut lorsqu'une ligne est pleine (ou le \n).
@@ -83,10 +89,11 @@ impl Writer {
                 let col = self.column_position;
 
                 let color_code = self.color_code;
-                self.buffer.chars[row][col] = ScreenChar {
+                //Au lieu d'une affectation normale utilisant =, nous utilisons maintenant la writeméthode . Cela garantit que le compilateur n'optimisera jamais cette écriture.
+                self.buffer.chars[row][col].write(ScreenChar {
                     ascii_character: byte,
                     color_code,
-                };
+                });
                 self.column_position += 1;
             }
         }

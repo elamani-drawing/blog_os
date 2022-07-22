@@ -17,3 +17,6 @@ panic = "abort" # désactive le déroulement de la pile lors d'un panic
 #Au lieu d'écrire notre propre bootloader, qui est un projet en soi, nous utilisons le bootloadercrate. Cette caisse implémente un chargeur de démarrage BIOS de base sans aucune dépendance C, juste Rust et assemblage en ligne
 [dependencies]
 bootloader = "0.9.8"
+#le compilateur peut décider que nos ecritures avec nos fonctions et le tampon vga sont inutiles et peuvent être omises
+#Afin d'utiliser les écritures volatiles pour le tampon VGA, nous utilisons la bibliothèque volatile . Cette caisse (c'est ainsi que les packages sont appelés dans le monde Rust) fournit un Volatiletype de wrapper avec readet des writeméthodes. Ces méthodes utilisent en interne les fonctions read_volatile et write_volatile de la bibliothèque principale et garantissent ainsi que les lectures/écritures ne sont pas optimisées.
+volatile = "0.2.6"
