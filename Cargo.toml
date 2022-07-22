@@ -20,3 +20,11 @@ bootloader = "0.9.8"
 #le compilateur peut décider que nos ecritures avec nos fonctions et le tampon vga sont inutiles et peuvent être omises
 #Afin d'utiliser les écritures volatiles pour le tampon VGA, nous utilisons la bibliothèque volatile . Cette caisse (c'est ainsi que les packages sont appelés dans le monde Rust) fournit un Volatiletype de wrapper avec readet des writeméthodes. Ces méthodes utilisent en interne les fonctions read_volatile et write_volatile de la bibliothèque principale et garantissent ainsi que les lectures/écritures ne sont pas optimisées.
 volatile = "0.2.6"
+#Pour obtenir une mutabilité intérieure synchronisée, les utilisateurs de la bibliothèque standard peuvent utiliser Mutex .
+#Il fournit une exclusion mutuelle en bloquant les threads lorsque la ressource est déjà verrouillée. Mais notre noyau de base n'a pas de support de blocage ni même de concept de threads, nous ne pouvons donc pas l'utiliser non plus.
+# le spinlock . Au lieu de bloquer, les threads essaient simplement de le verrouiller encore et encore dans une boucle serrée et donc de brûler du temps CPU jusqu'à ce que le mutex soit à nouveau libre.
+spin = "0.5.2"
+
+[dependencies.lazy_static]
+version = "1.0"
+features = ["spin_no_std"]

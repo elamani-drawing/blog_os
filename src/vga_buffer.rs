@@ -3,6 +3,20 @@
 use volatile::Volatile;
 //macros de formatage
 use core::fmt;
+use spin::Mutex;
+
+//interface globale
+//Pour fournir un écrivain global qui peut être utilisé comme interface à partir d'autres modules sans transporter d' Writerinstance, nous essayons de créer un static WRITER
+
+use lazy_static::lazy_static;
+
+lazy_static! {
+    pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
+        column_position: 0,
+        color_code: ColorCode::new(Color::Yellow, Color::Black),
+        buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
+    });
+}
 
 //couleur
 //Normalement, le compilateur émettrait un avertissement pour chaque variante inutilisée. En utilisant l' #[allow(dead_code)]attribut, nous désactivons ces avertissements pour l' Colorénumération.
@@ -115,7 +129,27 @@ impl Writer {
         }
     }
 
-    fn new_line(&mut self) {/* TODO */}
+    fn new_line(&mut self) {
+        //Nous parcourons tous les caractères de l'écran et déplaçons chaque caractère d'une ligne vers le haut
+        for row in 1..BUFFER_HEIGHT {
+            for col in 0..BUFFER_WIDTH {
+                let character = self.buffer.chars[row][col].read();
+                self.buffer.chars[row - 1][col].write(character);
+            }
+        }
+        self.clear_row(BUFFER_HEIGHT - 1);
+        self.column_position = 0;
+    }
+    //Cette méthode efface une ligne en remplaçant tous ses caractères par un espace.
+    fn clear_row(&mut self, row: usize) {
+        let blank = ScreenChar {
+            ascii_character: b' ',
+            color_code: self.color_code,
+        };
+        for col in 0..BUFFER_WIDTH {
+            self.buffer.chars[row][col].write(blank);
+        }
+    }
 
 }
 
@@ -126,23 +160,4 @@ impl fmt::Write for Writer {
         self.write_string(s);
         Ok(())
     }
-}
-
-// Pour écrire des caractères à l'écran, vous pouvez créer une fonction temporaire :
-pub fn print_something() {
-    //Nous pouvons maintenant utiliser les macros intégrées write!/ de writeln!formatage de Rust
-    use core::fmt::Write;
-    //il crée d'abord un nouveau Writer qui pointe vers le tampon VGA à 0xb8000
-    // tout d'abord, nous transformons l'entier en un pointeur brut0xb8000 mutable 
-    // Ensuite, nous le convertissons en une référence mutable en le déréférencant (via ) et en l'empruntant immédiatement à nouveau (via ). Cette conversion nécessite un block , car le compilateur ne peut pas garantir que le pointeur brut est valide.*&mutunsafe
-    let mut writer = Writer {
-        column_position: 0,
-        color_code: ColorCode::new(Color::Yellow, Color::Black),
-        buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
-    };
-
-    writer.write_byte(b'H');
-    writer.write_string("ello! ");
-    writer.write_string("Wörld!");
-    write!(writer, "The numbers are {} and {}", 42, 1.0/3.0).unwrap();
 }
