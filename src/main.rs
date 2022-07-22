@@ -11,7 +11,7 @@
 use core::panic::PanicInfo;
 mod vga_buffer;
 
-static HELLO: &[u8] = b"Hello World!";
+mod serial;
 
 //nous réécrivons le point d’entrée du système d’exploitation avec notre propre fonction _start
 //En utilisant l’attribut #[no_mangle], nous désactivons la décoration de nom pour assurer que le compilateur Rust crée une fonction avec le nom _start. Sans cet attribut, le compilateur génèrerait un symbol obscure _ZN3blog_os4_start7hb173fedf945531caE pour donner un nom unique à chaque fonction.
@@ -41,7 +41,7 @@ fn panic(info: &PanicInfo) -> ! {
 //Le type d'argument &[&dyn Fn()]est une tranche de références d' objet de trait du trait Fn() . Il s'agit essentiellement d'une liste de références à des types qui peuvent être appelés comme une fonction.
 #[cfg(test)]
 fn test_runner(tests: &[&dyn Fn()]) {
-    println!("Running {} tests", tests.len());
+    serial_println!("Running {} tests", tests.len());
     for test in tests {
         test();
     }
@@ -51,9 +51,9 @@ fn test_runner(tests: &[&dyn Fn()]) {
 
 #[test_case]
 fn trivial_assertion() {
-    print!("trivial assertion... ");
+    serial_print!("trivial assertion... ");
     assert_eq!(1, 1);
-    println!("[ok]");
+    serial_println!("[ok]");
 }
 
 //maintenant utiliser le Porttype fourni par le crate pour créer une exit_qemufonctio

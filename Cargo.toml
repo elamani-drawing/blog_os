@@ -26,6 +26,8 @@ volatile = "0.2.6"
 spin = "0.5.2"
 #pour les entrees sorties avec isa-debug etc. etc. 
 x86_64 = "0.14.2"
+#Un moyen simple d'envoyer les données consiste à utiliser le port série , une ancienne norme d'interface qui ne se trouve plus dans les ordinateurs modernes. Il est facile à programmer et QEMU peut rediriger les octets envoyés en série vers la sortie standard de l'hôte ou vers un fichier.
+uart_16550 = "0.2.0"
 
 [dependencies.lazy_static]
 version = "1.0"
