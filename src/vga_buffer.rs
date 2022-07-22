@@ -1,7 +1,8 @@
 
 //buffer
 use volatile::Volatile;
-
+//macros de formatage
+use core::fmt;
 
 //couleur
 //Normalement, le compilateur émettrait un avertissement pour chaque variante inutilisée. En utilisant l' #[allow(dead_code)]attribut, nous désactivons ces avertissements pour l' Colorénumération.
@@ -118,9 +119,20 @@ impl Writer {
 
 }
 
+//utilisation des macros de formattage de rust
+// pour  facilement imprimer différents types comme des entiers ou des flottants
+impl fmt::Write for Writer {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        self.write_string(s);
+        Ok(())
+    }
+}
+
 // Pour écrire des caractères à l'écran, vous pouvez créer une fonction temporaire :
 pub fn print_something() {
-    //l crée d'abord un nouveau Writer qui pointe vers le tampon VGA à 0xb8000
+    //Nous pouvons maintenant utiliser les macros intégrées write!/ de writeln!formatage de Rust
+    use core::fmt::Write;
+    //il crée d'abord un nouveau Writer qui pointe vers le tampon VGA à 0xb8000
     // tout d'abord, nous transformons l'entier en un pointeur brut0xb8000 mutable 
     // Ensuite, nous le convertissons en une référence mutable en le déréférencant (via ) et en l'empruntant immédiatement à nouveau (via ). Cette conversion nécessite un block , car le compilateur ne peut pas garantir que le pointeur brut est valide.*&mutunsafe
     let mut writer = Writer {
@@ -130,6 +142,7 @@ pub fn print_something() {
     };
 
     writer.write_byte(b'H');
-    writer.write_string("ello ");
+    writer.write_string("ello! ");
     writer.write_string("Wörld!");
+    write!(writer, "The numbers are {} and {}", 42, 1.0/3.0).unwrap();
 }
