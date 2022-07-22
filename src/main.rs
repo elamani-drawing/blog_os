@@ -4,6 +4,7 @@
 #![no_main]
 
 use core::panic::PanicInfo;
+mod vga_buffer;
 
 static HELLO: &[u8] = b"Hello World!";
 
@@ -14,19 +15,7 @@ pub extern "C" fn _start() -> ! {
     // cette fonction est le point d'entrée, comme le linker cherche une fonction
     // nomée `_start` par défaut
 
-    //le tampon VGA est situé à l'adresse 0xb8000
-    //nous transformons l'entier 0xb8000en un pointeur brut
-    let vga_buffer = 0xb8000 as *mut u8;
-    // Ensuite, nous parcourons les octets de la chaîne d'octets statique .
-    for (i, &byte) in HELLO.iter().enumerate() {
-        //il y a un unsafe bloc autour de toutes les écritures en mémoire. La raison en est que le compilateur Rust ne peut pas prouver que les pointeurs bruts que nous créons sont valides
-        //En les mettant dans un unsafebloc, nous disons essentiellement au compilateur que nous sommes absolument sûrs que les opérations sont valides
-        unsafe {
-            // nous utilisons la méthode pour écrire l'octet de chaîne et l'octet de couleur correspondant ( est un cyan clair)
-            *vga_buffer.offset(i as isize * 2) = byte;
-            *vga_buffer.offset(i as isize * 2 + 1) = 0xb;
-        }
-    }
+    vga_buffer::print_something();
 
     loop {}
 }

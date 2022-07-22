@@ -10,5 +10,6 @@ target = "x86_64-blog_os.json"
 
 #Le target.'cfg(target_os = "none")'tableau s'applique à toutes les cibles qui ont défini le "os"champ de leur fichier de configuration cible sur "none". Cela inclut notre x86_64-blog_os.jsoncible. La runnerclé spécifie la commande qui doit être invoquée pour cargo run. La commande est exécutée après une construction réussie avec le chemin de l'exécutable passé comme premier argument
 [target.'cfg(target_os = "none")']
+#La runnerclé spécifie la commande qui doit être invoquée pour cargo run. La commande est exécutée après une construction réussie avec le chemin de l'exécutable passé comme premier argument.
 runner = "bootimage runner"
 

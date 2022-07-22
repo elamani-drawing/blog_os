@@ -23,5 +23,8 @@ rustup component add llvm-tools-preview
 
 //Après avoir installé bootimageet ajouté le llvm-tools-previewcomposant, nous pouvons créer une image disque amorçable en exécutant 
 cargo bootimage
+
 //Après avoir exécuté la commande, vous devriez voir une image de disque amorçable nommée bootimage-blog_os.bindans votre target/x86_64-blog_os/debugrépertoire. Vous pouvez le démarrer sur une machine virtuelle ou le copier sur une clé USB pour le démarrer sur du matériel réel.
+qemu-system-x86_64 -drive format=raw,file=target/x86_64-blog_os/debug/bootimage-blog_os.bin
+
 
