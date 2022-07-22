@@ -2,6 +2,11 @@
 #![no_std]
 //Pour indiquer au compilateur que nous ne voulons pas utiliser la chaîne de point d’entrée normale
 #![no_main]
+//pour les tests
+#![feature(custom_test_frameworks)]
+#![test_runner(crate::test_runner)]
+//Nous définissons le nom de la fonction d'entrée du framework de test sur test_main et allons l'appeller depuis notre _startpoint d'entrée. 
+#![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
 mod vga_buffer;
@@ -16,7 +21,9 @@ pub extern "C" fn _start() -> ! {
     // nomée `_start` par défaut
    
     println!("Hello World{}", "!");
-    panic!("Some panic message");
+    //panic!("Some panic message");
+    #[cfg(test)]
+    test_main();
     loop {}
 }
 
@@ -28,4 +35,21 @@ fn panic(info: &PanicInfo) -> ! {
     
     println!("{}", info);
     loop {}
+}
+
+//Notre exécuteur imprime simplement un court message de débogage, puis appelle chaque fonction de test de la liste. 
+//Le type d'argument &[&dyn Fn()]est une tranche de références d' objet de trait du trait Fn() . Il s'agit essentiellement d'une liste de références à des types qui peuvent être appelés comme une fonction.
+#[cfg(test)]
+fn test_runner(tests: &[&dyn Fn()]) {
+    println!("Running {} tests", tests.len());
+    for test in tests {
+        test();
+    }
+}
+
+#[test_case]
+fn trivial_assertion() {
+    print!("trivial assertion... ");
+    assert_eq!(1, 1);
+    println!("[ok]");
 }

@@ -7,12 +7,12 @@ authors = ["Au Or <au.or@github.com>"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 # le profile utilisé pour `cargo build`
-[profile.dev]
-panic = "abort" # désactive le déroulement de la pile lors d'un panic
+#[profile.dev]
+#panic = "abort" # désactive le déroulement de la pile lors d'un panic
 
 # le profile utilisé pour `cargo build --release`
-[profile.release]
-panic = "abort" # désactive le déroulement de la pile lors d'un panic
+#[profile.release]
+#panic = "abort" # désactive le déroulement de la pile lors d'un panic
 
 #Au lieu d'écrire notre propre bootloader, qui est un projet en soi, nous utilisons le bootloadercrate. Cette caisse implémente un chargeur de démarrage BIOS de base sans aucune dépendance C, juste Rust et assemblage en ligne
 [dependencies]
