@@ -27,13 +27,24 @@ pub extern "C" fn _start() -> ! {
     loop {}
 }
 
-//L’attribut panic_handler définit la fonction que le compilateur doit appeler lorsqu’un panic arrive.
-/// Cette fonction est appelée à chaque panic.
+// L’attribut panic_handler définit la fonction que le compilateur doit appeler lorsqu’un panic arrive.
+// Cette fonction est appelée à chaque panic.
+#[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     //Le paramètre PanicInfo contient le fichier et la ligne où le panic a eu lieu et le message optionnel de panic.
     
     println!("{}", info);
+    loop {}
+}
+
+// Pour quitter QEMU avec un message d'erreur sur une panique, nous pouvons utiliser la compilation conditionnelle pour utiliser un gestionnaire de panique différent en mode test
+#[cfg(test)]
+#[panic_handler]
+fn panic(info: &PanicInfo) -> ! {
+    serial_println!("[failed]\n");
+    serial_println!("Error: {}\n", info);
+    exit_qemu(QemuExitCode::Failed);
     loop {}
 }
 
