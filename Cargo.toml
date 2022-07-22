@@ -36,12 +36,13 @@ features = ["spin_no_std"]
 #nous avons une boucle sans fin à la fin de notre _startfonction et devons fermer QEMU manuellement à chaque exécution de cargo test
 #il y a une trappe d'évacuation : QEMU prend en charge un isa-debug-exitdispositif spécial, qui fournit un moyen facile de quitter QEMU du système invité. Pour l'activer, nous devons passer un -deviceargument à QEMU. Nous pouvons le faire en ajoutant une package.metadata.bootimage.test-argsclé de configuration dans notre Cargo.toml
 [package.metadata.bootimage]
-
 #en quittant qemu apres les tests, meme s'ils ont reussi cargo considere tout les codes de sortie differents de 0 comme des erreurs
 #Pour contourner ce problème, bootimagefournit une test-success-exit-codeclé de configuration qui mappe un code de sortie spécifié au code de sortie 0
 #Avec cette configuration, bootimagemappe notre code de sortie de réussite sur le code de sortie 0, de sorte qu'il cargo testreconnaisse correctement le cas de réussite et ne compte pas le test comme ayant échoué.
 test-args = [
     "-device", "isa-debug-exit,iobase=0xf4,iosize=0x04", "-serial", "stdio",
     "-display", "none"
-]
+]  
 test-success-exit-code = 33         # (0x10 << 1) | 1
+#en diminue temporairement le temps accorder au test (chaque test avait par defaut 5 mins)
+test-timeout = 300  #(en secondes)
