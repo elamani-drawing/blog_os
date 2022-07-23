@@ -46,3 +46,10 @@ test-args = [
 test-success-exit-code = 33         # (0x10 << 1) | 1
 #en diminue temporairement le temps accorder au test (chaque test avait par defaut 5 mins)
 test-timeout = 300  #(en secondes)
+
+#voir shuld_panic
+#le lanceur de test n'est pas vraiment nécessaire. Pour des cas comme celui-ci, nous pouvons désactiver complètement le lanceur de test et exécuter notre test directement dans la _startfonction.
+#La clé pour cela est de désactiver l' harnessindicateur pour le test dans le Cargo.toml, qui définit si un exécuteur de test est utilisé pour un test d'intégration. Lorsqu'il est défini sur false, le lanceur de test par défaut et la fonctionnalité de lanceur de test personnalisé sont désactivés, de sorte que le test est traité comme un exécutable normal.
+[[test]]
+name = "should_panic"
+harness = false
