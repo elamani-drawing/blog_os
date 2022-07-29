@@ -13,7 +13,7 @@ pub mod vga_buffer;
 //pour les exceptions
 
 pub mod interrupts;
-
+pub mod gdt;
 
 pub fn init() {
     interrupts::init_idt();

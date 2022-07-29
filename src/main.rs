@@ -23,10 +23,14 @@ pub extern "C" fn _start() -> ! {
 
     blog_os::init(); // new
 
-    // trigger a page fault
-    unsafe {
-        *(0xdeadbeef as *mut u64) = 42;
-    };
+    // Nous utilisons unsafepour écrire à l'adresse invalide 0xdeadbeef. L'adresse virtuelle n'est pas mappée à une adresse physique dans les tables de pages, donc une erreur de page se produit. Nous n'avons pas enregistré de gestionnaire d'erreurs de page dans notre IDT , donc une double erreur se produit.
+
+    fn stack_overflow() {
+        stack_overflow(); // for each recursion, the return address is pushed
+    }
+
+    // trigger a stack overflow
+    //stack_overflow(); //uncomment line below to trigger a stack overflow
 
     // invoke a breakpoint exception
     x86_64::instructions::interrupts::int3();
