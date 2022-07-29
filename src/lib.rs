@@ -16,7 +16,11 @@ pub mod interrupts;
 pub mod gdt;
 
 pub fn init() {
+    gdt::init();
     interrupts::init_idt();
+    //interruption materiel avec pics
+    //Nous utilisons la initializefonction pour effectuer l'initialisation du PIC. Comme la ChainedPics::newfonction, cette fonction est également dangereuse car elle peut provoquer un comportement indéfini si le PIC est mal configuré.
+    unsafe { interrupts::PICS.lock().initialize() }; 
 }
 
 //L'ajout manuel de ces instructions d'impression pour chaque test que nous écrivons est fastidieux (serial_println!("[ok]"); etc.), alors mettons à jour notre test_runnerpour imprimer ces messages automatiquement. 
