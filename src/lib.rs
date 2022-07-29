@@ -1,6 +1,7 @@
 #![no_std]
 #![cfg_attr(test, no_main)]
 #![feature(custom_test_frameworks)]
+#![feature(abi_x86_interrupt)]
 #![test_runner(crate::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
@@ -8,6 +9,15 @@ use core::panic::PanicInfo;
 
 pub mod serial;
 pub mod vga_buffer;
+
+//pour les exceptions
+
+pub mod interrupts;
+
+
+pub fn init() {
+    interrupts::init_idt();
+}
 
 //L'ajout manuel de ces instructions d'impression pour chaque test que nous écrivons est fastidieux (serial_println!("[ok]"); etc.), alors mettons à jour notre test_runnerpour imprimer ces messages automatiquement. 
 pub trait Testable {
@@ -78,6 +88,7 @@ pub fn exit_qemu(exit_code: QemuExitCode) {
 #[cfg(test)]
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
+    init();
     test_main();
     loop {}
 }

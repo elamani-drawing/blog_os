@@ -18,10 +18,24 @@ pub extern "C" fn _start() -> ! {
     // cette fonction est le point d'entrée, comme le linker cherche une fonction
     // nomée `_start` par défaut
    
+    
     println!("Hello World{}", "!");
+
+    blog_os::init(); // new
+
+    // trigger a page fault
+    unsafe {
+        *(0xdeadbeef as *mut u64) = 42;
+    };
+
+    // invoke a breakpoint exception
+    x86_64::instructions::interrupts::int3();
+    
     //panic!("Some panic message");
     #[cfg(test)]
     test_main();
+
+    println!("It did not crash!");
     loop {}
 }
 
