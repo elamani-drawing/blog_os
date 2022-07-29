@@ -7,12 +7,11 @@
 
 use core::panic::PanicInfo;
 
-pub mod serial;
-pub mod vga_buffer;
-
+pub mod gdt;
 //pour les exceptions
 pub mod interrupts;
-pub mod gdt;
+pub mod serial;
+pub mod vga_buffer;
 
 pub fn init() {
     gdt::init();
@@ -41,7 +40,6 @@ where
     }
 }
 
-
 //Notre exécuteur imprime simplement un court message de débogage, puis appelle chaque fonction de test de la liste. 
 //Le type d'argument &[&dyn Fn()]est une tranche de références d' objet de trait du trait Fn() . Il s'agit essentiellement d'une liste de références à des types qui peuvent être appelés comme une fonction.
 //#[cfg(test)]
@@ -55,8 +53,6 @@ pub fn test_runner(tests: &[&dyn Testable]) {
     exit_qemu(QemuExitCode::Success);
 }
 
-
-
 // Pour quitter QEMU avec un message d'erreur sur une panique, nous pouvons utiliser la compilation conditionnelle pour utiliser un gestionnaire de panique différent en mode test
 //Nous factorisons également l'implémentation de notre gestionnaire de panique dans une test_panic_handlerfonction publique, afin qu'il soit également disponible pour les exécutables.
 pub fn test_panic_handler(info: &PanicInfo) -> ! {
@@ -65,7 +61,6 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
     exit_qemu(QemuExitCode::Failed);
     hlt_loop();
 }
-
 
 //maintenant utiliser le Porttype fourni par le crate pour créer une exit_qemufonctio
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -86,7 +81,6 @@ pub fn exit_qemu(exit_code: QemuExitCode) {
         port.write(exit_code as u32);
     }
 }
-
 
 pub fn hlt_loop() -> ! {
     loop {

@@ -6,6 +6,19 @@ authors = ["Au Or <au.or@github.com>"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+#voir shuld_panic
+#le lanceur de test n'est pas vraiment nécessaire. Pour des cas comme celui-ci, nous pouvons désactiver complètement le lanceur de test et exécuter notre test directement dans la _startfonction.
+#La clé pour cela est de désactiver l' harnessindicateur pour le test dans le Cargo.toml, qui définit si un exécuteur de test est utilisé pour un test d'intégration. Lorsqu'il est défini sur false, le lanceur de test par défaut et la fonctionnalité de lanceur de test personnalisé sont désactivés, de sorte que le test est traité comme un exécutable normal.
+[[test]]
+name = "should_panic"
+harness = false
+#Pour tester notre nouveau gdtmodule et s'assurer que le gestionnaire de double faute est correctement appelé sur un débordement de pile, nous pouvons ajouter un test d'intégration. L'idée est de provoquer une double faute dans la fonction de test et de vérifier que le gestionnaire de double faute est appelé.
+#Comme notre panic_handlertest, le test se déroulera sans harnais de test . La raison en est que nous ne pouvons pas continuer l'exécution après une double faute, donc plus d'un test n'a pas de sens. Pour désactiver le harnais de test pour le test, nous ajoutons ce qui suit à notreCargo.toml :
+[[test]]
+name = "stack_overflow"
+harness = false
+#Maintenant cargo test --test stack_overflowdevrait compiler avec succès. Le test échoue bien sûr, puisque la unimplementedmacro panique.
+
 # le profile utilisé pour `cargo build`
 #[profile.dev]
 #panic = "abort" # désactive le déroulement de la pile lors d'un panic
@@ -30,7 +43,6 @@ x86_64 = "0.14.2"
 uart_16550 = "0.2.0"
 #La configuration se produit en écrivant des valeurs spéciales dans les ports de commande et de données des PIC. Heureusement, il existe déjà un crate appelé pic8259
 pic8259 = "0.10.1"
-
 pc-keyboard = "0.5.0"
 
 [dependencies.lazy_static]
@@ -50,16 +62,3 @@ test-args = [
 test-success-exit-code = 33         # (0x10 << 1) | 1
 #en diminue temporairement le temps accorder au test (chaque test avait par defaut 5 mins)
 test-timeout = 300  #(en secondes)
-
-#voir shuld_panic
-#le lanceur de test n'est pas vraiment nécessaire. Pour des cas comme celui-ci, nous pouvons désactiver complètement le lanceur de test et exécuter notre test directement dans la _startfonction.
-#La clé pour cela est de désactiver l' harnessindicateur pour le test dans le Cargo.toml, qui définit si un exécuteur de test est utilisé pour un test d'intégration. Lorsqu'il est défini sur false, le lanceur de test par défaut et la fonctionnalité de lanceur de test personnalisé sont désactivés, de sorte que le test est traité comme un exécutable normal.
-[[test]]
-name = "should_panic"
-harness = false
-#Pour tester notre nouveau gdtmodule et s'assurer que le gestionnaire de double faute est correctement appelé sur un débordement de pile, nous pouvons ajouter un test d'intégration. L'idée est de provoquer une double faute dans la fonction de test et de vérifier que le gestionnaire de double faute est appelé.
-#Comme notre panic_handlertest, le test se déroulera sans harnais de test . La raison en est que nous ne pouvons pas continuer l'exécution après une double faute, donc plus d'un test n'a pas de sens. Pour désactiver le harnais de test pour le test, nous ajoutons ce qui suit à notreCargo.toml :
-[[test]]
-name = "stack_overflow"
-harness = false
-#Maintenant cargo test --test stack_overflowdevrait compiler avec succès. Le test échoue bien sûr, puisque la unimplementedmacro panique.

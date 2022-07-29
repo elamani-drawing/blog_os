@@ -1,15 +1,11 @@
-
 //buffer
 use volatile::Volatile;
 //macros de formatage
 use core::fmt;
 use spin::Mutex;
-
 //interface globale
 //Pour fournir un écrivain global qui peut être utilisé comme interface à partir d'autres modules sans transporter d' Writerinstance, nous essayons de créer un static WRITER
-
 use lazy_static::lazy_static;
-
 lazy_static! {
     pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
         column_position: 0,
@@ -59,7 +55,6 @@ impl ColorCode {
 
 //tampon de texte
 //Nous pouvons maintenant ajouter des structures pour représenter un caractère d'écran et le tampon de texte
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 //repr(C) il garantit que les champs de la structure sont disposés exactement comme dans une structure C et garantit ainsi le bon ordre des champs
 #[repr(C)]
@@ -180,7 +175,11 @@ macro_rules! println {
 #[doc(hidden)]
 pub fn _print(args: fmt::Arguments) {
     use core::fmt::Write;
-    WRITER.lock().write_fmt(args).unwrap();
+    use x86_64::instructions::interrupts;
+
+    interrupts::without_interrupts(|| {
+        WRITER.lock().write_fmt(args).unwrap();
+    });
 }
 
 //Maintenant que nous avons un cadre de test fonctionnel, nous pouvons créer quelques tests pour notre implémentation de tampon VGA. 
