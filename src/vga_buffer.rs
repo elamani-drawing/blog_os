@@ -202,12 +202,19 @@ fn test_println_many() {
 //On peut aussi créer une fonction de test pour vérifier que les lignes imprimées apparaissent bien à l'écran 
 #[test_case]
 fn test_println_output() {
+    use core::fmt::Write;
+    use x86_64::instructions::interrupts;
     //a fonction définit une chaîne de test, l'imprime à l'aide printlnde , puis itère sur les caractères d'écran du static WRITER, qui représente le tampon de texte vga. Puisque printlnimprime jusqu'à la dernière ligne d'écran puis ajoute immédiatement une nouvelle ligne, la chaîne doit apparaître sur line BUFFER_HEIGHT - 2.
     let s = "Some test string that fits on a single line";
-    println!("{}", s);
-    //En utilisant enumerate, nous comptons le nombre d'itérations dans la variable i, que nous utilisons ensuite pour charger le caractère d'écran correspondant à c. En comparant le ascii_charactercaractère de l'écran avec c, nous nous assurons que chaque caractère de la chaîne apparaît réellement dans le tampon de texte vga.
-    for (i, c) in s.chars().enumerate() {
-        let screen_char = WRITER.lock().buffer.chars[BUFFER_HEIGHT - 2][i].read();
-        assert_eq!(char::from(screen_char.ascii_character), c);
-    }
+    //Pour éviter un autre blocage, nous désactivons les interruptions pendant la durée des tests. Sinon, le test pourrait être interrompu alors que le graveur est toujours verrouillé.
+    interrupts::without_interrupts(|| {
+        //Nous gardons l'écrivain verrouillé pour le test complet en utilisant lock()explicitement la méthode.
+        let mut writer = WRITER.lock();
+        writeln!(writer, "\n{}", s).expect("writeln failed");
+        //En utilisant enumerate, nous comptons le nombre d'itérations dans la variable i, que nous utilisons ensuite pour charger le caractère d'écran correspondant à c. En comparant le ascii_charactercaractère de l'écran avec c, nous nous assurons que chaque caractère de la chaîne apparaît réellement dans le tampon de texte vga.
+        for (i, c) in s.chars().enumerate() {
+            let screen_char = writer.buffer.chars[BUFFER_HEIGHT - 2][i].read();
+            assert_eq!(char::from(screen_char.ascii_character), c);
+        }
+    });
 }
