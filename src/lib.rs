@@ -11,7 +11,6 @@ pub mod serial;
 pub mod vga_buffer;
 
 //pour les exceptions
-
 pub mod interrupts;
 pub mod gdt;
 
@@ -21,6 +20,8 @@ pub fn init() {
     //interruption materiel avec pics
     //Nous utilisons la initializefonction pour effectuer l'initialisation du PIC. Comme la ChainedPics::newfonction, cette fonction est également dangereuse car elle peut provoquer un comportement indéfini si le PIC est mal configuré.
     unsafe { interrupts::PICS.lock().initialize() }; 
+    //activations des interruptions 
+    x86_64::instructions::interrupts::enable();  
 }
 
 //L'ajout manuel de ces instructions d'impression pour chaque test que nous écrivons est fastidieux (serial_println!("[ok]"); etc.), alors mettons à jour notre test_runnerpour imprimer ces messages automatiquement. 
@@ -87,6 +88,11 @@ pub fn exit_qemu(exit_code: QemuExitCode) {
 }
 
 
+pub fn hlt_loop() -> ! {
+    loop {
+        x86_64::instructions::hlt();
+    }
+}
 
 /// Entry point for `cargo test`
 #[cfg(test)]

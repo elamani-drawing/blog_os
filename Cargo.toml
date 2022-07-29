@@ -31,6 +31,8 @@ uart_16550 = "0.2.0"
 #La configuration se produit en écrivant des valeurs spéciales dans les ports de commande et de données des PIC. Heureusement, il existe déjà un crate appelé pic8259
 pic8259 = "0.10.1"
 
+pc-keyboard = "0.5.0"
+
 [dependencies.lazy_static]
 version = "1.0"
 features = ["spin_no_std"]

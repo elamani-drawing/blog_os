@@ -23,24 +23,16 @@ pub extern "C" fn _start() -> ! {
 
     blog_os::init(); // new
 
-    // Nous utilisons unsafepour écrire à l'adresse invalide 0xdeadbeef. L'adresse virtuelle n'est pas mappée à une adresse physique dans les tables de pages, donc une erreur de page se produit. Nous n'avons pas enregistré de gestionnaire d'erreurs de page dans notre IDT , donc une double erreur se produit.
-
-    fn stack_overflow() {
-        stack_overflow(); // for each recursion, the return address is pushed
-    }
-
-    // trigger a stack overflow
-    //stack_overflow(); //uncomment line below to trigger a stack overflow
-
     // invoke a breakpoint exception
-    x86_64::instructions::interrupts::int3();
+    //x86_64::instructions::interrupts::int3();
     
     //panic!("Some panic message");
     #[cfg(test)]
     test_main();
 
     println!("It did not crash!");
-    loop {}
+    //loop {}
+    blog_os::hlt_loop();
 }
 
 // L’attribut panic_handler définit la fonction que le compilateur doit appeler lorsqu’un panic arrive.
@@ -51,13 +43,7 @@ fn panic(info: &PanicInfo) -> ! {
     //Le paramètre PanicInfo contient le fichier et la ligne où le panic a eu lieu et le message optionnel de panic.
     
     println!("{}", info);
-    loop {}
-}
-
-
-#[test_case]
-fn trivial_assertion() {
-    assert_eq!(1, 1);
+    blog_os::hlt_loop();
 }
 
 //utilisation de la panic test
@@ -65,4 +51,9 @@ fn trivial_assertion() {
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     blog_os::test_panic_handler(info)
+}
+
+#[test_case]
+fn trivial_assertion() {
+    assert_eq!(1, 1);
 }
