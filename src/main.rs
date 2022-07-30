@@ -19,6 +19,7 @@ entry_point!(kernel_main);
 //Nous n'avons plus besoin d'utiliser extern "C"ou no_manglepour notre point d'entrée, car la macro définit _startpour nous le véritable point d'entrée de niveau inférieur
 //kernel_mainfonction est maintenant une fonction Rust tout à fait normale, nous pouvons donc lui choisir un nom arbitraire.
 fn kernel_main(boot_info: &'static BootInfo) -> ! {
+    use blog_os::allocator; 
     use blog_os::memory::{self, BootInfoFrameAllocator};
     use x86_64::{structures::paging::Page, VirtAddr};
 
@@ -37,8 +38,11 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     let page_ptr: *mut u64 = page.start_address().as_mut_ptr();
     unsafe { page_ptr.offset(400).write_volatile(0x_f021_f077_f065_f04e) };
 
+    allocator::init_heap(&mut mapper, &mut frame_allocator)
+        .expect("heap initialization failed");//Dans le cas où la init_heapfonction renvoie une erreur, nous paniquons en utilisant la Result::expectméthode car il n'y a actuellement aucun moyen sensé pour nous de gérer cette erreur.
+
     let x = Box::new(41);
-    
+
     #[cfg(test)]
     test_main();
 
