@@ -8,11 +8,21 @@ use x86_64::{
     },
     VirtAddr,
 };
+/*
 use linked_list_allocator::LockedHeap;
 #[global_allocator]
 static ALLOCATOR: LockedHeap = LockedHeap::empty();
-pub struct Dummy;
+*/
+//pour utiliser lalocator bump au lieu de linked_list 
+//point fort rapide mais inconvenient : une seule allocation de longue durée suffit pour empecher la éutilisation de la memoir
+use bump::BumpAllocator;
 
+#[global_allocator]
+static ALLOCATOR: Locked<BumpAllocator> = Locked::new(BumpAllocator::new());
+
+
+pub struct Dummy;
+pub mod bump;
 
 //La fonction prend des références mutables à a Mapperet à une FrameAllocatorinstance, toutes deux limitées à des pages de 4 Ko en utilisant Size4KiBcomme paramètre générique. La valeur de retour de la fonction est a Resultavec le type d'unité ()comme variante de succès et a MapToErrorcomme variante d'erreur, qui est le type d'erreur renvoyé par la Mapper::map_tométhode. La réutilisation du type d'erreur a ici du sens car la map_tométhode est la principale source d'erreurs dans cette fonction.
 pub fn init_heap(
@@ -62,3 +72,25 @@ unsafe impl GlobalAlloc for Dummy {
         panic!("dealloc should be never called")
     }
 }
+
+//pour les implementation d'allocator ex allocator/bump
+pub struct Locked<A> {
+    inner: spin::Mutex<A>,
+}
+
+impl<A> Locked<A> {
+    pub const fn new(inner: A) -> Self {
+        Locked {
+            inner: spin::Mutex::new(inner),
+        }
+    }
+
+    pub fn lock(&self) -> spin::MutexGuard<A> {
+        self.inner.lock()
+    }
+}
+
+fn align_up(addr: usize, align: usize) -> usize {
+    (addr + align - 1) & !(align - 1)
+}
+
