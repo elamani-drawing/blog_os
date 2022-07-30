@@ -44,6 +44,8 @@ uart_16550 = "0.2.0"
 #La configuration se produit en écrivant des valeurs spéciales dans les ports de commande et de données des PIC. Heureusement, il existe déjà un crate appelé pic8259
 pic8259 = "0.10.1"
 pc-keyboard = "0.5.0"
+#Son nom vient du fait qu'il utilise une structure de données de liste chaînée pour garder une trace des régions de mémoire désallouées. Voir le post suivant pour une explication plus détaillée de cette approche.
+linked_list_allocator = "0.9.0"
 
 [dependencies.lazy_static]
 version = "1.0"

@@ -8,10 +8,11 @@ use x86_64::{
     },
     VirtAddr,
 };
+use linked_list_allocator::LockedHeap;
+#[global_allocator]
+static ALLOCATOR: LockedHeap = LockedHeap::empty();
 pub struct Dummy;
 
-#[global_allocator]
-static ALLOCATOR: Dummy = Dummy;
 
 //La fonction prend des références mutables à a Mapperet à une FrameAllocatorinstance, toutes deux limitées à des pages de 4 Ko en utilisant Size4KiBcomme paramètre générique. La valeur de retour de la fonction est a Resultavec le type d'unité ()comme variante de succès et a MapToErrorcomme variante d'erreur, qui est le type d'erreur renvoyé par la Mapper::map_tométhode. La réutilisation du type d'erreur a ici du sens car la map_tométhode est la principale source d'erreurs dans cette fonction.
 pub fn init_heap(
@@ -37,6 +38,11 @@ pub fn init_heap(
             //Nous utilisons la Mapper::map_tométhode de création du mappage dans la table des pages actives. La méthode peut échouer, nous utilisons donc à nouveau l' opérateur de point d'interrogation pour transmettre l'erreur à l'appelant. En cas de succès, la méthode renvoie une MapperFlushinstance que nous pouvons utiliser pour mettre à jour le tampon de recherche de traduction à l'aide de la flushméthode.
             mapper.map_to(page, frame, flags, frame_allocator)?.flush()
         };
+    }
+    //il renvoie toujours une erreur sur alloc. Pour résoudre ce problème, nous devons initialiser l'allocateur après avoir créé le tas
+    //Nous utilisons la lockméthode sur le spinlock interne du LockedHeaptype pour obtenir une référence exclusive à l' Heapinstance enveloppée, sur laquelle nous appelons ensuite la initméthode avec les limites du tas comme arguments. Il est important que nous initialisions le tas après avoir mappé les pages du tas, car la initfonction essaie déjà d'écrire dans la mémoire du tas.
+    unsafe {
+        ALLOCATOR.lock().init(HEAP_START, HEAP_SIZE);
     }
 
     Ok(())
