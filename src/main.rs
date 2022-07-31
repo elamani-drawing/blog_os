@@ -18,6 +18,7 @@ use core::panic::PanicInfo;
 entry_point!(kernel_main);
 //multitache
 use blog_os::task::{Task, simple_executor::SimpleExecutor};
+use blog_os::task::keyboard;
 
 //Nous n'avons plus besoin d'utiliser extern "C"ou no_manglepour notre point d'entrée, car la macro définit _startpour nous le véritable point d'entrée de niveau inférieur
 //kernel_mainfonction est maintenant une fonction Rust tout à fait normale, nous pouvons donc lui choisir un nom arbitraire.
@@ -48,6 +49,8 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     //multitache
     let mut executor = SimpleExecutor::new();
     executor.spawn(Task::new(example_task()));
+    //Ajoutons la print_keypressestâche à notre exécuteur dans notre main.rs pour obtenir une entrée au clavier fonctionnelle
+    executor.spawn(Task::new(keyboard::print_keypresses()));
     executor.run();
 
     #[cfg(test)]
