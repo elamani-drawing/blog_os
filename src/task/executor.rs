@@ -97,6 +97,21 @@ impl Executor {
     pub fn run(&mut self) -> ! {
         loop {
             self.run_ready_tasks();
+            self.sleep_if_idle();  
+        }
+    }
+    fn sleep_if_idle(&self) {
+        //Pour éviter les conditions de concurrence, nous désactivons les interruptions avant de vérifier si le task_queueest vide.
+        use x86_64::instructions::interrupts::{self, enable_and_hlt};
+
+        interrupts::disable();
+        // Si c'est le cas, nous utilisons la enable_and_hltfonction pour activer les interruptions et mettre le CPU en veille en une seule opération atomique. 
+        //Dans le cas où la file d'attente n'est plus vide, cela signifie qu'une interruption a réveillé une tâche après son run_ready_tasksretour. Dans ce cas, 
+        //nous activons à nouveau les interruptions et continuons directement l'exécution sans exécuter hlt.
+        if self.task_queue.is_empty() {
+            enable_and_hlt();
+        } else {
+            interrupts::enable();
         }
     }
 }
