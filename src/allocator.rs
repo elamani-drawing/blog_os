@@ -14,12 +14,21 @@ use linked_list_allocator::LockedHeap;
 static ALLOCATOR: LockedHeap = LockedHeap::empty();
 */
 pub struct Dummy;
+//pour utiliser lalocator lined au lieu de fixed_size_block
+pub mod fixed_size_block;
+use fixed_size_block::FixedSizeBlockAllocator;
+
+#[global_allocator]
+static ALLOCATOR: Locked<FixedSizeBlockAllocator> = Locked::new(
+    FixedSizeBlockAllocator::new());
 //pour utiliser lalocator lined au lieu de linked_list_allocator 
 pub mod linked_list;
+/*
 use linked_list::LinkedListAllocator;
 #[global_allocator]
 static ALLOCATOR: Locked<LinkedListAllocator> =
     Locked::new(LinkedListAllocator::new());
+    */
 //pour utiliser lalocator bump au lieu de linked_list_allocator 
 pub mod bump;
 
