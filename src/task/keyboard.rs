@@ -2,8 +2,10 @@ use conquer_once::spin::OnceCell;
 use crossbeam_queue::ArrayQueue;
 use core::{pin::Pin, task::{Poll, Context}};
 use futures_util::stream::Stream;
+use futures_util::task::AtomicWaker;
 
 static SCANCODE_QUEUE: OnceCell<ArrayQueue<u8>> = OnceCell::uninit();
+static WAKER: AtomicWaker = AtomicWaker::new();
 
 
 use crate::println;
@@ -43,11 +45,26 @@ impl Stream for ScancodeStream {
         //Nous utilisons d'abord la OnceCell::try_getméthode pour obtenir une référence à la file d'attente de scancode initialisée. Cela ne devrait jamais 
         //échouer puisque nous initialisons la file d'attente dans la newfonction, nous pouvons donc utiliser la expectméthode en toute sécurité pour paniquer 
         //si elle n'est pas initialisée.
-        let queue = SCANCODE_QUEUE.try_get().expect("not initialized");
+        let queue = SCANCODE_QUEUE.try_get().expect("scancode queue not initialized");
+
+        //Si le premier appel à queue.pop()échoue, la file d'attente est potentiellement vide. Seulement potentiellement parce que le gestionnaire d'interruptions
+        // a peut-être rempli la file d'attente de manière asynchrone immédiatement après la vérification. Étant donné que cette condition de concurrence peut
+        // se reproduire lors de la prochaine vérification, nous devons enregistrer le Wakerdans le WAKERstatique avant la deuxième vérification. De cette 
+        //façon, un réveil peut se produire avant notre retour Poll::Pending, mais il est garanti que nous obtenons un réveil pour tous les scancodes poussés
+        // après la vérification.
+        if let Ok(scancode) = queue.pop() {
+            return Poll::Ready(Some(scancode));
+        }
+
+        WAKER.register(&cx.waker());
+
         // Ensuite, nous utilisons la ArrayQueue::pop méthode pour essayer d'obtenir l'élément suivant de la file d'attente. Si cela réussit, nous renvoyons 
         //le scancode enveloppé dans Poll::Ready(Some(…)). S'il échoue, cela signifie que la file d'attente est vide. Dans ce cas, nous retournons Poll::Pending.
         match queue.pop() {
-            Ok(scancode) => Poll::Ready(Some(scancode)),
+            Ok(scancode) => {
+                WAKER.take();
+                Poll::Ready(Some(scancode))
+            }
             Err(crossbeam_queue::PopError) => Poll::Pending,
         }
     }
