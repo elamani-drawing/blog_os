@@ -10,14 +10,15 @@
 
 extern crate alloc;
 
-use alloc::{boxed::Box, vec, vec::Vec, rc::Rc};
+//use alloc::{boxed::Box, vec, vec::Vec, rc::Rc};
 use blog_os::println;
 use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
 //Pour s'assurer que la fonction de point d'entrée a toujours la signature correcte attendue par le chargeur de démarrage, le bootloadercrate fournit une entry_pointmacro qui fournit un moyen vérifié de type pour définir une fonction Rust comme point d'entrée.
 entry_point!(kernel_main);
 //multitache
-use blog_os::task::{Task, simple_executor::SimpleExecutor};
+use blog_os::task::{Task};
+use blog_os::task::executor::Executor;
 use blog_os::task::keyboard;
 
 //Nous n'avons plus besoin d'utiliser extern "C"ou no_manglepour notre point d'entrée, car la macro définit _startpour nous le véritable point d'entrée de niveau inférieur
@@ -47,17 +48,12 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
 
         
     //multitache
-    let mut executor = SimpleExecutor::new();
+    let mut executor = Executor::new();
     executor.spawn(Task::new(example_task()));
     //Ajoutons la print_keypressestâche à notre exécuteur dans notre main.rs pour obtenir une entrée au clavier fonctionnelle
     executor.spawn(Task::new(keyboard::print_keypresses()));
     executor.run();
 
-    #[cfg(test)]
-    test_main();
-
-    println!("It did not crash!");
-    blog_os::hlt_loop();
 }
 
 //function async
