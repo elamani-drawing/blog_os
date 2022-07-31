@@ -9,18 +9,23 @@ use x86_64::{
     VirtAddr,
 };
 use linked_list_allocator::LockedHeap;
-/* 
+
 #[global_allocator]
 static ALLOCATOR: LockedHeap = LockedHeap::empty();
-*/
+
 pub struct Dummy;
 //pour utiliser lalocator lined au lieu de fixed_size_block
 pub mod fixed_size_block;
+//Bien que l'approche par bloc de taille fixe ait de bien meilleures performances que l'approche par liste chaînée, elle gaspille jusqu'à la moitié de 
+//la mémoire lors de l'utilisation de puissances de 2 comme tailles de bloc. La valeur de ce compromis dépend fortement du type d'application.
+// Pour un noyau de système d'exploitation, où les performances sont essentielles, l'approche par bloc de taille fixe semble être le meilleur choix.
+/*
 use fixed_size_block::FixedSizeBlockAllocator;
-
 #[global_allocator]
 static ALLOCATOR: Locked<FixedSizeBlockAllocator> = Locked::new(
     FixedSizeBlockAllocator::new());
+*/
+
 //pour utiliser lalocator lined au lieu de linked_list_allocator 
 pub mod linked_list;
 /*
@@ -28,7 +33,8 @@ use linked_list::LinkedListAllocator;
 #[global_allocator]
 static ALLOCATOR: Locked<LinkedListAllocator> =
     Locked::new(LinkedListAllocator::new());
-    */
+*/
+
 //pour utiliser lalocator bump au lieu de linked_list_allocator 
 pub mod bump;
 
