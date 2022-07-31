@@ -16,6 +16,9 @@ use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
 //Pour s'assurer que la fonction de point d'entrée a toujours la signature correcte attendue par le chargeur de démarrage, le bootloadercrate fournit une entry_pointmacro qui fournit un moyen vérifié de type pour définir une fonction Rust comme point d'entrée.
 entry_point!(kernel_main);
+//multitache
+use blog_os::task::{Task, simple_executor::SimpleExecutor};
+
 //Nous n'avons plus besoin d'utiliser extern "C"ou no_manglepour notre point d'entrée, car la macro définit _startpour nous le véritable point d'entrée de niveau inférieur
 //kernel_mainfonction est maintenant une fonction Rust tout à fait normale, nous pouvons donc lui choisir un nom arbitraire.
 fn kernel_main(boot_info: &'static BootInfo) -> ! {
@@ -42,30 +45,26 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
         .expect("heap initialization failed");//Dans le cas où la init_heapfonction renvoie une erreur, nous paniquons en utilisant la Result::expectméthode car il n'y a actuellement aucun moyen sensé pour nous de gérer cette erreur.
 
         
-    // allocate a number on the heap
-    let heap_value = Box::new(41);
-    println!("heap_value at {:p}", heap_value);
-
-    // create a dynamically sized vector
-    let mut vec = Vec::new();
-    for i in 0..500 {
-        vec.push(i);
-    }
-    println!("vec at {:p}", vec.as_slice());
-
-    // create a reference counted vector -> will be freed when count reaches 0
-    let reference_counted = Rc::new(vec![1, 2, 3]);
-    let cloned_reference = reference_counted.clone();
-    println!("current reference count is {}", Rc::strong_count(&cloned_reference));
-    core::mem::drop(reference_counted);
-    println!("reference count is {} now", Rc::strong_count(&cloned_reference));
-
+    //multitache
+    let mut executor = SimpleExecutor::new();
+    executor.spawn(Task::new(example_task()));
+    executor.run();
 
     #[cfg(test)]
     test_main();
 
     println!("It did not crash!");
     blog_os::hlt_loop();
+}
+
+//function async
+async fn async_number() -> u32 {
+    42
+}
+
+async fn example_task() {
+    let number = async_number().await;
+    println!("async number: {}", number);
 }
 
 // L’attribut panic_handler définit la fonction que le compilateur doit appeler lorsqu’un panic arrive.

@@ -20,6 +20,8 @@ pub mod allocator;
 use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
 
+//multi tache
+pub mod task;
 
 #[cfg(test)]
 entry_point!(test_kernel_main);
