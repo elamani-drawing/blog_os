@@ -78,7 +78,7 @@ fn many_boxes() {
 
 //Comme le many_boxestest, ce test crée un grand nombre d'allocations pour provoquer une panne de mémoire insuffisante si l'allocateur ne réutilise pas la mémoire libérée. De plus, 
 //le test crée une long_livedallocation qui dure toute l'exécution de la boucle.
-/*
+
 //le test echoue logiquement si nous utilisons le bump alocator
 #[test_case]
 fn many_boxes_long_lived() {
@@ -89,4 +89,3 @@ fn many_boxes_long_lived() {
     }
     assert_eq!(*long_lived, 1); 
 }
-*/

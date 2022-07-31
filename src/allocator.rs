@@ -8,21 +8,28 @@ use x86_64::{
     },
     VirtAddr,
 };
-/*
 use linked_list_allocator::LockedHeap;
+/* 
 #[global_allocator]
 static ALLOCATOR: LockedHeap = LockedHeap::empty();
 */
-//pour utiliser lalocator bump au lieu de linked_list 
+pub struct Dummy;
+//pour utiliser lalocator lined au lieu de linked_list_allocator 
+pub mod linked_list;
+use linked_list::LinkedListAllocator;
+#[global_allocator]
+static ALLOCATOR: Locked<LinkedListAllocator> =
+    Locked::new(LinkedListAllocator::new());
+//pour utiliser lalocator bump au lieu de linked_list_allocator 
+pub mod bump;
+
+/*
 //point fort rapide mais inconvenient : une seule allocation de longue durée suffit pour empecher la éutilisation de la memoir
 use bump::BumpAllocator;
 
 #[global_allocator]
 static ALLOCATOR: Locked<BumpAllocator> = Locked::new(BumpAllocator::new());
-
-
-pub struct Dummy;
-pub mod bump;
+*/
 
 //La fonction prend des références mutables à a Mapperet à une FrameAllocatorinstance, toutes deux limitées à des pages de 4 Ko en utilisant Size4KiBcomme paramètre générique. La valeur de retour de la fonction est a Resultavec le type d'unité ()comme variante de succès et a MapToErrorcomme variante d'erreur, qui est le type d'erreur renvoyé par la Mapper::map_tométhode. La réutilisation du type d'erreur a ici du sens car la map_tométhode est la principale source d'erreurs dans cette fonction.
 pub fn init_heap(
