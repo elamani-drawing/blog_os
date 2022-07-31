@@ -6,6 +6,8 @@ use alloc::boxed::Box;
 use core::task::{Context, Poll};
 
 pub mod simple_executor;
+pub mod keyboard;
+
 pub struct Task {
     ///Nous exigeons que le futur associé à une tâche renvoie (). Cela signifie que les tâches ne renvoient aucun résultat, elles sont juste 
     ///exécutées pour ses effets secondaires.
