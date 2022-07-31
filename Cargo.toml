@@ -65,6 +65,12 @@ features = ["alloc"]
 version = "0.2.0"
 default-features = false
 
+#Implémentons le Streamtrait pour our ScancodeStreamfournir les valeurs de de SCANCODE_QUEUEmanière asynchrone. Pour cela, nous devons d'abord ajouter une dépendance sur la futures-utilcaisse, qui contient le Streamtype
+[dependencies.futures-util]
+version = "0.3.4"
+default-features = false
+features = ["alloc"]
+
 #nous avons une boucle sans fin à la fin de notre _startfonction et devons fermer QEMU manuellement à chaque exécution de cargo test
 #il y a une trappe d'évacuation : QEMU prend en charge un isa-debug-exitdispositif spécial, qui fournit un moyen facile de quitter QEMU du système invité. 
 #Pour l'activer, nous devons passer un -deviceargument à QEMU. Nous pouvons le faire en ajoutant une package.metadata.bootimage.test-argsclé de configuration dans notre Cargo.toml
