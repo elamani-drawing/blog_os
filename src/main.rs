@@ -26,7 +26,7 @@ use blog_os::task::keyboard;
 fn kernel_main(boot_info: &'static BootInfo) -> ! {
     use blog_os::allocator; 
     use blog_os::memory::{self, BootInfoFrameAllocator};
-    use x86_64::{structures::paging::Page, VirtAddr};
+    use x86_64::{VirtAddr};
 
     println!("Hello World{}", "!");
     blog_os::init();
@@ -34,14 +34,6 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
     let mut mapper = unsafe { memory::init(phys_mem_offset) };
     let mut frame_allocator = unsafe { BootInfoFrameAllocator::init(&boot_info.memory_map) };
-
-    // map an unused page
-    let page = Page::containing_address(VirtAddr::new(0xdeadbeaf000));
-    memory::create_example_mapping(page, &mut mapper, &mut frame_allocator);
-
-    // write the string `New!` to the screen through the new mapping
-    let page_ptr: *mut u64 = page.start_address().as_mut_ptr();
-    unsafe { page_ptr.offset(400).write_volatile(0x_f021_f077_f065_f04e) };
 
     allocator::init_heap(&mut mapper, &mut frame_allocator)
         .expect("heap initialization failed");//Dans le cas où la init_heapfonction renvoie une erreur, nous paniquons en utilisant la Result::expectméthode car il n'y a actuellement aucun moyen sensé pour nous de gérer cette erreur.
