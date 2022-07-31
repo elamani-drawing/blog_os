@@ -17,6 +17,11 @@ pub(crate) fn add_scancode(scancode: u8) {
     if let Ok(queue) = SCANCODE_QUEUE.try_get() {
         if let Err(_) = queue.push(scancode) {
             println!("WARNING: scancode queue full; dropping keyboard input");
+        } else {
+            //Le seul changement que nous avons effectué est d'ajouter un appel à WAKER.wake()si le push vers la file d'attente de scancode réussit. 
+            //Si un waker est enregistré dans le WAKERstatique, cette méthode appellera la wakeméthode portant le même nom, qui notifiera l'exécuteur.
+            // Sinon, l'opération est un no-op, c'est-à-dire que rien ne se passe.
+            WAKER.wake(); 
         }
     } else {
         println!("WARNING: scancode queue uninitialized");
